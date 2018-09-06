@@ -6,17 +6,29 @@ from neato_node import Bump
 from neato_node import Accel
 import rospy
 
-class ReceiveMessageode(object):
+###############################################################################
+#Sending classes
+###############################################################################
+
+class MessageNode(object):
+    """This node publishes a message at 2 Hz"""
     def __init__(self):
-        rospy.init_node('receive_message')
-        rospy.Subscriber("/my_point", PointStamped, process_point)
-
-
-    def process_point(self, m):
-        print(m)
+        rospy.init_node('test_message')   #initialize with roscore
+        self.publisher = rospy.Publisher('/my_point', PointStamped, queue_size=10)
 
     def run(self):
-        rospy.spin()
+        r = rospy.Rate(2)  #Publishing at 2 Hz
+        while not rospy.is_shutdown():
+            my_point_stamped = PointStamped(header=Header(stamp=rospy.Time.now(), frame_id="odom"), point=Point(1.0,2.0,0.0))
+            publisher.publish(my_point_stamped)
+            r.sleep()
+
+
+
+
+###############################################################################
+#Receiving classes
+###############################################################################
 
 class ReceiveLidar(object):
     def __init__(self):
