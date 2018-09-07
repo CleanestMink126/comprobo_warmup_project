@@ -8,7 +8,7 @@ import interface
 class TeleopC(object):
     def __init__ (self):
         self.settings = termios.tcgetattr(sys.stdin)
-        self.myspeedctrl = SendSpeed()
+        self.myspeedctrl = interface.SendSpeed()
 
     def getKey(self):
         tty.setraw(sys.stdin.fileno())
@@ -22,17 +22,21 @@ class TeleopC(object):
         while key != '\x03':
             key = self.getKey()
             if key == "a":
-                self.myspeedctrl.send_speed(0,0,0,1)
+                self.myspeedctrl.send_speed(0,1)
 
             elif key =="s":
-                self.myspeedctrl.send_speed(-1,0,0,0)
+                self.myspeedctrl.send_speed(-1,0)
 
             elif key == "w":
-                self.myspeedctrl.send_speed(1,0,0,0)
+                self.myspeedctrl.send_speed(1,0)
 
-            elif key == "s":
-                self.myspeedctrl.send_speed(0,0,0,-1)
+            elif key == "d":
+                self.myspeedctrl.send_speed(0,-1)
 
+            elif key == ' ':
+                self.myspeedctrl.send_speed(0,0)
+            elif key == 'l':
+                self.myspeedctrl.low_rider()
 
 
 

@@ -1,12 +1,12 @@
 """ Investigate receiving a message using a callback function """
 
 from geometry_msgs.msg import PointStamped
-from sensor_msgs import LaserScan
-from neato_node import Bump
-from neato_node import Accel
-from geometry_msgs import Twist
-from geometry_msgs.Vector3 import linear
-from geometry_msgs.Vector3 import angular
+# from sensor_msgs import LaserScan
+# from neato_node import Bump
+# from neato_node import Accel
+from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Vector3
+
 import rospy
 
 ###############################################################################
@@ -31,10 +31,20 @@ class SendSpeed(object):
         rospy.init_node('Get_Speed')   #initialize with roscore
         self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
-    def send_speed(move_forward = 0, turn_left = 0):
-        my_point_stamped = Twist(linear=linear(move_forward,0,0), angular=angular(0,0,turn_left))
+    def send_speed(self,move_forward = 0, turn_left = 0):
+        my_point_stamped = Twist(linear=Vector3(move_forward,0,0), angular=Vector3(0,0,turn_left))
         self.publisher.publish(my_point_stamped)
 
+    def low_rider(self):
+        t = 10
+        r = rospy.Rate(5)
+        for i in range(t):
+            my_point_stamped = Twist(linear=Vector3(1,0,0))
+            self.publisher.publish(my_point_stamped)
+            r.sleep()
+            my_point_stamped = Twist(linear=Vector3(-1,0,0))
+            self.publisher.publish(my_point_stamped)
+            r.sleep()
 
 ###############################################################################
 #Receiving classes
