@@ -1,9 +1,9 @@
 """ Investigate receiving a message using a callback function """
 
 from geometry_msgs.msg import PointStamped
-# from sensor_msgs import LaserScan
-# from neato_node import Bump
-# from neato_node import Accel
+from sensor_msgs.msg import LaserScan
+from neato_node.msg import Bump
+from neato_node.msg import Accel
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 
