@@ -2,12 +2,12 @@
 
 from geometry_msgs.msg import PointStamped
 import rospy
-import teleop.TeleopC
+from teleop import *
 
 
 def run():
     mytelC = TeleopC()
-    while key != '\x03':
+    while mytelC.key != '\x03':
         mytelC.key = mytelC.getKey()
         if mytelC.key == "a":
             mytelC.myspeedctrl.send_speed(0,1)
@@ -20,14 +20,20 @@ def run():
         elif mytelC.key == ' ':
             mytelC.myspeedctrl.send_speed(0,0)
         elif mytelC.key == 'z':
-            r = rospy.Rate(.25)
-            w = rospy.Rate(.25)
+            r = rospy.Rate(1)
+            w = rospy.Rate(1)
             for i in range(4):
-                if i != 0:
-                    mytelC.myspeedctrl.send_speed(0,1)
-                    w.sleep()
                 mytelC.myspeedctrl.send_speed(1,0)
+                print('before r')
                 r.sleep()
+                print('after r')
+                mytelC.myspeedctrl.send_speed(0,-1)
+                print('before w')
+                w.sleep()
+                print('after w')
+
+            mytelC.myspeedctrl.send_speed(0,0)
+
 
 if __name__ == "__main__":
     run()

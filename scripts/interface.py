@@ -31,7 +31,11 @@ class SendSpeed(object):
         rospy.init_node('Get_Speed')   #initialize with roscore
         self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
-    def send_speed(self,move_forward = 0, turn_left = 0):
+    def send_speed(self,move_forward = None, turn_left = None):
+        if move_forward == None:
+            move_forward = 0
+        if turn_left == None:
+            turn_left = 0
         my_point_stamped = Twist(linear=Vector3(move_forward,0,0), angular=Vector3(0,0,turn_left))
         self.publisher.publish(my_point_stamped)
 
