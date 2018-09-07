@@ -35,6 +35,7 @@ class SendSpeed(object):
         my_point_stamped = Twist(linear=linear(move_forward,0,0), angular=angular(0,0,turn_left))
         self.publisher.publish(my_point_stamped)
 
+
 ###############################################################################
 #Receiving classes
 ###############################################################################
