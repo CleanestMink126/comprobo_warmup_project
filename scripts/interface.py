@@ -27,13 +27,12 @@ class MessageNode(object):
             r.sleep()
 
 class SendSpeed(object):
-    """This node publishes a message at 2 Hz"""
     def __init__(self):
         rospy.init_node('Get_Speed')   #initialize with roscore
         self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
-    def send_speed(lx=0,ly=0,lz=0,ax=0,ay=0,az=0):
-        my_point_stamped = Twist(linear=linear(lx,ly,lz), angular=angular(ax,ay,az))
+    def send_speed(move_forward = 0, turn_left = 0):
+        my_point_stamped = Twist(linear=linear(move_forward,0,0), angular=angular(0,0,turn_left))
         self.publisher.publish(my_point_stamped)
 
 ###############################################################################
