@@ -2,19 +2,32 @@
 
 from geometry_msgs.msg import PointStamped
 import rospy
-
-class ReceiveMessageode(object):
-    def __init__(self):
-        rospy.init_node('receive_message')
-        rospy.Subscriber("/my_point", PointStamped, process_point)
+import teleop.TeleopC
 
 
-    def process_point(self, m):
-        print(m)
+def run():
+    mytelC = TeleopC()
+    while key != '\x03':
+        mytelC.key = mytelC.getKey()
+        if mytelC.key == "a":
+            mytelC.myspeedctrl.send_speed(0,1)
+        elif mytelC.key =="s":
+            mytelC.myspeedctrl.send_speed(-1,0)
+        elif mytelC.key == "w":
+            mytelC.myspeedctrl.send_speed(1,0)
+        elif mytelC.key == "d":
+            mytelC.myspeedctrl.send_speed(0,-1)
+        elif mytelC.key == ' ':
+            mytelC.myspeedctrl.send_speed(0,0)
+        elif mytelC.key == 'z':
+            r = rospy.Rate(.25)
+            w = rospy.Rate(.25)
+            for i in range(4):
+                if i != 0:
+                    mytelC.myspeedctrl.send_speed(0,1)
+                    w.sleep()
+                mytelC.myspeedctrl.send_speed(1,0)
+                r.sleep()
 
-    def run(self):
-        rospy.spin()
-
-if __name__ == '__main__':
-    node = ReceiveMessageNode()
-    node.run()
+if __name__ == "__main__":
+    run()
