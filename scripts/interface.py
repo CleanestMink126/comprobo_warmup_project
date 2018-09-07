@@ -47,10 +47,10 @@ class SendSpeed(object):
 class ReceiveLidar(object):
     def __init__(self):
         rospy.init_node('receive_lidar')
-        rospy.Subscriber("/my_point", LaserScan, process_point)
+        rospy.Subscriber("/scan", LaserScan, process_point)
 
     def process_range(self, m):
-        return m.range
+        print(m.range)
 
     def run(self):
         rospy.spin()
