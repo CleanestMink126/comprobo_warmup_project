@@ -32,13 +32,9 @@ class SendSpeed(object):
         rospy.init_node('Get_Speed')   #initialize with roscore
         self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
-    def run(self):
-        r = rospy.Rate(2)  #Publishing at 2 Hz
-        while not rospy.is_shutdown():
-            my_point_stamped = Twist(linear=linear(lx,ly,lz), angular=angular(ax,ay,az))
-            publisher.publish(my_point_stamped)
-            r.sleep()
-
+    def send_speed(lx=0,ly=0,lz=0,ax=0,ay=0,az=0):
+        my_point_stamped = Twist(linear=linear(lx,ly,lz), angular=angular(ax,ay,az))
+        self.publisher.publish(my_point_stamped)
 
 ###############################################################################
 #Receiving classes
