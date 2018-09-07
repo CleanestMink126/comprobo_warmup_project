@@ -4,6 +4,9 @@ from geometry_msgs.msg import PointStamped
 from sensor_msgs import LaserScan
 from neato_node import Bump
 from neato_node import Accel
+from geometry_msgs import Twist
+from geometry_msgs.Vector3 import linear
+from geometry_msgs.Vector3 import angular
 import rospy
 
 ###############################################################################
@@ -23,7 +26,18 @@ class MessageNode(object):
             publisher.publish(my_point_stamped)
             r.sleep()
 
+class SendSpeed(object):
+    """This node publishes a message at 2 Hz"""
+    def __init__(self):
+        rospy.init_node('Get_Speed')   #initialize with roscore
+        self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
+    def run(self):
+        r = rospy.Rate(2)  #Publishing at 2 Hz
+        while not rospy.is_shutdown():
+            my_point_stamped = Twist(linear=linear(lx,ly,lz), angular=angular(ax,ay,az))
+            publisher.publish(my_point_stamped)
+            r.sleep()
 
 
 ###############################################################################
