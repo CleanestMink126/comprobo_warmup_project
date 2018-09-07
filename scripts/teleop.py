@@ -9,34 +9,32 @@ class TeleopC(object):
     def __init__ (self):
         self.settings = termios.tcgetattr(sys.stdin)
         self.myspeedctrl = interface.SendSpeed()
+        self.key = None
 
     def getKey(self):
         tty.setraw(sys.stdin.fileno())
         select.select([sys.stdin], [], [], 0)
-        key = sys.stdin.read(1)
+        self.key = sys.stdin.read(1)
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
-        return key
+        return self.key
 
     def run(self):
-        key=None
         while key != '\x03':
-            key = self.getKey()
-            if key == "a":
+            self.key = self.getKey()
+            if self.key == "a":
                 self.myspeedctrl.send_speed(0,1)
-
-            elif key =="s":
+            elif self.key =="s":
                 self.myspeedctrl.send_speed(-1,0)
-
-            elif key == "w":
+            elif self.key == "w":
                 self.myspeedctrl.send_speed(1,0)
-
-            elif key == "d":
+            elif self.key == "d":
                 self.myspeedctrl.send_speed(0,-1)
-
-            elif key == ' ':
+            elif self.key == ' ':
                 self.myspeedctrl.send_speed(0,0)
-            elif key == 'l':
+            elif self.key == 'l':
                 self.myspeedctrl.low_rider()
+            
+
 
 
 
