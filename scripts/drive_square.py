@@ -20,16 +20,14 @@ def run():
         elif mytelC.key == ' ':
             mytelC.myspeedctrl.send_speed(0,0)
         elif mytelC.key == 'z':
-            r = rospy.Rate(1)
-            w = rospy.Rate(1)
             for i in range(4):
                 mytelC.myspeedctrl.send_speed(1,0)
                 print('before r')
-                r.sleep()
+                rospy.sleep(1)
                 print('after r')
                 mytelC.myspeedctrl.send_speed(0,-1)
                 print('before w')
-                w.sleep()
+                rospy.sleep(1)
                 print('after w')
 
             mytelC.myspeedctrl.send_speed(0,0)
