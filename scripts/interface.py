@@ -57,17 +57,17 @@ class SendSpeed(object):
 class ReceiveLidar(object):
     def __init__(self):
         rospy.init_node('receive_lidar')
-        rospy.Subscriber("/scan", LaserScan, process_point)
+        rospy.Subscriber("/scan", LaserScan, self.process_range)
 
     def process_range(self, m):
-        print(m.range)
+        print(m.ranges)
 
     def run(self):
         rospy.spin()
 
 class ReceiveBump(object):
     def __init__(self):
-        rospy.init_node('receive_lidar')
+        rospy.init_node('receive_bump')
         rospy.Subscriber("/bump", Bump, process_bump)
 
     def process_bump(self, m):
@@ -78,7 +78,7 @@ class ReceiveBump(object):
 
 class ReceiveAccel(object):
     def __init__(self):
-        rospy.init_node('receive_lidar')
+        rospy.init_node('receive_bump')
         rospy.Subscriber("/accel", Accel, process_accel)
 
     def process_accel(self, m):
@@ -88,5 +88,5 @@ class ReceiveAccel(object):
         rospy.spin()
 
 if __name__ == '__main__':
-    node = ReceiveMessageNode()
+    node = ReceiveLidar()
     node.run()
