@@ -1,9 +1,9 @@
 """ Investigate receiving a message using a callback function """
 
 from geometry_msgs.msg import PointStamped
-# from sensor_msgs import LaserScan
-# from neato_node import Bump
-# from neato_node import Accel
+from sensor_msgs.msg import LaserScan
+from neato_node.msg import Bump
+from neato_node.msg import Accel
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 
@@ -31,7 +31,11 @@ class SendSpeed(object):
         rospy.init_node('Get_Speed')   #initialize with roscore
         self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
-    def send_speed(self,move_forward = 0, turn_left = 0):
+    def send_speed(self,move_forward = None, turn_left = None):
+        if move_forward == None:
+            move_forward = 0
+        if turn_left == None:
+            turn_left = 0
         my_point_stamped = Twist(linear=Vector3(move_forward,0,0), angular=Vector3(0,0,turn_left))
         self.publisher.publish(my_point_stamped)
 
