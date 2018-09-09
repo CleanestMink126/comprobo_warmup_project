@@ -23,11 +23,11 @@ def run():
             for i in range(4):
                 mytelC.myspeedctrl.send_speed(1,0)
                 print('before r')
-                rospy.sleep(1)
+                rospy.sleep(4)
                 print('after r')
                 mytelC.myspeedctrl.send_speed(0,-1)
                 print('before w')
-                rospy.sleep(1)
+                rospy.sleep(1.61)
                 print('after w')
 
             mytelC.myspeedctrl.send_speed(0,0)
