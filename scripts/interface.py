@@ -6,7 +6,9 @@ from neato_node.msg import Bump
 from neato_node.msg import Accel
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
-
+import matplotlib.pyplot as plt
+import numpy as np
+import math
 import rospy
 
 ###############################################################################
@@ -58,12 +60,43 @@ class ReceiveLidar(object):
     def __init__(self):
         rospy.init_node('receive_lidar')
         rospy.Subscriber("/scan", LaserScan, self.process_range)
+        self.ranges = None
 
     def process_range(self, m):
-        print(m.ranges)
+        self.ranges = m.ranges
+
+    def get_range(self):
+        return self.ranges
 
     def run(self):
         rospy.spin()
+
+    def get_wall(self, number_check=3, threshold = 1000):
+        values = np.array(self.ranges)
+        no_zeros_index = np.where(values)
+        no_zeros = values[no_zeros_index]
+        least_three = no_zeros.argsort()[:3]
+        thresholds = []
+        for i in least_three:
+            thresholds.append(self.get_cost(i, no_zeros, no_zeros_index))
+
+
+    def get_cost(self, index, values, indices):
+        d = values[index]
+        exploration = 45
+        total_diff = 0.0
+        number_found = 0
+        for i in indices:
+            diff = min(abs(index - i), abs(index - 360 + i))
+            if diff <= 45:
+                supposed = d / math.cos(math.pi * diff / 180)
+                total_diff += (supposed - values[i])/values[i]
+                number_found +=1
+        if n < 10:
+            return 1
+        return total_diff/number_found
+
+
 
 class ReceiveBump(object):
     def __init__(self):
