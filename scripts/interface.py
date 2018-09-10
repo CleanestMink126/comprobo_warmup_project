@@ -71,28 +71,37 @@ class ReceiveLidar(object):
     def run(self):
         rospy.spin()
 
-    def get_wall(self, number_check=3, threshold = 1000):
+    def get_wall(self, threshold = .8):
+        if self.ranges is None:
+            return None, None
         values = np.array(self.ranges)
-        no_zeros_index = np.where(values)
+        # print(values)
+        no_zeros_index = np.where(values)[0]
+        # print(no_zeros_index)
+        if not len(no_zeros_index):
+            return None, None
         no_zeros = values[no_zeros_index]
-        least_three = no_zeros.argsort()[:3]
+        least = no_zeros.argsort()[0]
         thresholds = []
-        for i in least_three:
-            thresholds.append(self.get_cost(i, no_zeros, no_zeros_index))
-
+        if self.get_cost(least, no_zeros, no_zeros_index) < threshold:
+            return no_zeros_index[least], no_zeros[least]
+        else:
+            return None, None
 
     def get_cost(self, index, values, indices):
+        # print(index)
         d = values[index]
         exploration = 45
         total_diff = 0.0
         number_found = 0
-        for i in indices:
-            diff = min(abs(index - i), abs(index - 360 + i))
+        for i,v in enumerate(indices):
+            diff = min([abs(indices[index] - v), abs(indices[index] - 360 + v)])
             if diff <= 45:
                 supposed = d / math.cos(math.pi * diff / 180)
-                total_diff += (supposed - values[i])/values[i]
+                total_diff += abs(supposed - values[i])/supposed
                 number_found +=1
-        if n < 10:
+        if number_found < 30:
+            print('Not enough data')
             return 1
         return total_diff/number_found
 
@@ -122,4 +131,6 @@ class ReceiveAccel(object):
 
 if __name__ == '__main__':
     node = ReceiveLidar()
-    node.run()
+    while not rospy.is_shutdown():
+        print(node.get_wall())
+        rospy.sleep(.3)
