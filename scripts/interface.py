@@ -6,6 +6,7 @@ from neato_node.msg import Bump
 from neato_node.msg import Accel
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
+from nav_msgs.msg import Odometry
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -43,7 +44,8 @@ class SendSpeed(object):
         self.publisher.publish(my_point_stamped)
 
     def low_rider(self):
-        '''Joke function to make the neato bounce.
+        '''Ignore
+        Joke function to make the neato bounce.
         Like so: https://www.youtube.com/watch?v=HEEHmiAR71Y'''
         t = 10
         r = rospy.Rate(5)
@@ -61,57 +63,67 @@ class SendSpeed(object):
 
 class ReceiveLidar(object):
     '''
-    Class container that handles sending the speed to a running neato node.
+    Class container that handles reading Lidar values from a running neato node.
     It should be imported and used as needed by other scripts.
     '''
     def __init__(self):
         # rospy.init_node('receive_lidar')
+        '''Class currently only supports the range attribute of the Lidar
+        message.'''
         rospy.Subscriber("/scan", LaserScan, self.process_range)
         self.ranges = None
 
     def process_range(self, m):
-        self.ranges = m.ranges
+        self.ranges = m.ranges #set range
 
     def get_range(self):
-        return self.ranges
+        return self.ranges #get range for outside scripts
 
     def run(self):
         rospy.spin()
 
     def get_wall(self, threshold = .8, min_values = 5):
-        if self.ranges is None:
+        '''This method will find likely directions towards a wall given lidar data
+        returns: direction towards nearest wall
+                 distance to that wall
+        '''
+        if self.ranges is None: #if Lidar data has not been received
             print('NO RANGES')
             return None, None
-        values = np.array(self.ranges)
-
-        # print(values)
-        no_zeros_index = np.where(values)[0]
-        # print(no_zeros_index)
-        if not len(no_zeros_index):
+        ranges = np.array(self.ranges) #convert to numpy array
+        no_zeros_index = np.where(ranges)[0] #find indices where we have data
+        if not len(no_zeros_index): #make sure there is data
             print('NO REAL VALUES')
             return None, None
-        no_zeros = values[no_zeros_index]
-        least = no_zeros.argsort()
+        no_zeros = values[no_zeros_index] #get the corresponding values for the indices
+        least = no_zeros.argsort() #order the indices by closest values
         thresholds = []
         forbidden = set()
         number_checked = 0
         for least_val in least:
-            if no_zeros_index[least_val] in forbidden:
+            '''In this loop we check the lowest values and determine likelyhood
+            that they belong to a wall. After a point has been deemed unworthy,
+            we don't consider the points immediately around it because they
+            will not be different.'''
+            if no_zeros_index[least_val] in forbidden:#too close to another point
                 continue
             elif self.get_cost(least_val, no_zeros, no_zeros_index) < threshold:
-                return no_zeros_index[least], no_zeros[least]
-            else:
+                return no_zeros_index[least], no_zeros[least] # found likely wall
+            else: #the point is unworthy so blacklist this point and points around it
                 for degree in range(no_zeros_index[least_val] - 5,no_zeros_index[least_val] + 5):
                     forbidden.add(degree)
                 number_checked += 1
-            if number_checked >= min_values:
+
+            if number_checked >= min_values: #set max on how many points we visit
                 print('NOT GOOD ENOUGH')
                 return None, None
         print('RAN OUT OF POINTS')
         return None, None
 
     def get_cost(self, index, values, indices):
-        # print(index)
+        '''Determines the likelyhood that a given index is the closest point of
+        a wall by comparing its surroundings' readings to d/cos(theta) aka their
+        expected readings'''
         d = values[index]
         exploration = 45
         total_diff = 0.0
@@ -130,29 +142,58 @@ class ReceiveLidar(object):
 
 
 class ReceiveBump(object):
+    '''
+    Class container that handles reading Bump values from a running neato node.
+    It should be imported and used as needed by other scripts.
+    '''
     def __init__(self):
         rospy.init_node('receive_bump')
-        rospy.Subscriber("/bump", Bump, process_bump)
+        rospy.Subscriber("/bump", Bump, self.process_bump)
+        self.m = 0
 
     def process_bump(self, m):
-        return m
+        self.m  = m
 
     def run(self):
         rospy.spin()
 
 class ReceiveAccel(object):
+    '''
+    Class container that handles reading acceleration values from a running neato node.
+    It should be imported and used as needed by other scripts.
+    '''
     def __init__(self):
         rospy.init_node('receive_bump')
-        rospy.Subscriber("/accel", Accel, process_accel)
+        rospy.Subscriber("/accel", Accel, self.process_accel)
+        self.m = 0
 
     def process_accel(self, m):
-        return m
+        self.m  = m
+
+    def run(self):
+        rospy.spin()
+
+class ReceiveOdom(object):
+    '''
+    Class container that handles reading odometry values from a running neato node.
+    It should be imported and used as needed by other scripts.
+    '''
+    def __init__(self):
+        rospy.init_node('receive_odom')
+        rospy.Subscriber("/odom", Odometry, self.process_odom)
+        self.odom = None
+
+    def process_odom(self, m):
+        self.odom = m
+        print(m)
 
     def run(self):
         rospy.spin()
 
 if __name__ == '__main__':
-    node = ReceiveLidar()
-    while not rospy.is_shutdown():
-        print(node.get_wall())
-        rospy.sleep(.3)
+    # node = ReceiveLidar()
+    # while not rospy.is_shutdown():
+    #     print(node.get_wall())
+    #     rospy.sleep(.3)
+    node = ReceiveOdom()
+    node.run()
