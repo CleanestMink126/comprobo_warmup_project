@@ -1,8 +1,6 @@
 #For keyboard-controlled movement with AWSD and z
 #Use AWSD to move into desired position and z to make 1x1 m square
 #Comp Robo 2018 Warm-Up Project
-
-
 from geometry_msgs.msg import PointStamped
 import rospy
 from teleop import *
@@ -26,9 +24,9 @@ def run():
         elif mytelC.key == 'z': #turn in square
             for i in range(4):
                 mytelC.myspeedctrl.send_speed(1,0)
-                rospy.sleep(4)
+                rospy.sleep(4) #value found by trail and error
                 mytelC.myspeedctrl.send_speed(0,-1)
-                rospy.sleep(1.61)
+                rospy.sleep(1.61) #value found by trail and error
 
             mytelC.myspeedctrl.send_speed(0,0)
 

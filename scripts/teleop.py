@@ -11,12 +11,15 @@ import interface
 
 
 class TeleopC(object):
+    '''Controller for neato
+    Uses WASD controls with space to stop the neato'''
     def __init__ (self):
         self.settings = termios.tcgetattr(sys.stdin)
         self.myspeedctrl = interface.SendSpeed()
         self.key = None
 
     def getKey(self):
+        '''Given code to grab keyboard values'''
         tty.setraw(sys.stdin.fileno())
         select.select([sys.stdin], [], [], 0)
         self.key = sys.stdin.read(1)
@@ -24,7 +27,9 @@ class TeleopC(object):
         return self.key
 
     def run(self):
-        while key != '\x03':
+        '''Run this loop to control the robot.
+        ^C to quite.'''
+        while self.key != '\x03':
             self.key = self.getKey()
             if self.key == "a": #turn left
                 self.myspeedctrl.send_speed(0,1)

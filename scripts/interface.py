@@ -7,7 +7,7 @@ from neato_node.msg import Accel
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 from nav_msgs.msg import Odometry
-from visualization_messages.msgs import Marker 
+from visualization_messages.msgs import Marker
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -126,18 +126,19 @@ class ReceiveLidar(object):
         a wall by comparing its surroundings' readings to d/cos(theta) aka their
         expected readings'''
         d = values[index]
-        exploration = 45
+        valid_range = 45
+        required_points = 30
         total_diff = 0.0
         number_found = 0
         for i,v in enumerate(indices):
             diff = min([abs(indices[index] - v), abs(indices[index] - 360 + v)])
-            if diff <= 45:
+            if diff <= valid_range:
                 supposed = d / math.cos(math.pi * diff / 180)
                 total_diff += abs(supposed - values[i])/supposed
                 number_found +=1
-        if number_found < 30:
+        if number_found < required_points:
             print('Not enough data')
-            return 1
+            return 100 #random high number
         return total_diff/number_found
 
 
