@@ -14,26 +14,27 @@ import rospy
 ###############################################################################
 #Sending classes
 ###############################################################################
-
-class MessageNode(object):
-    """This node publishes a message at 2 Hz"""
-    def __init__(self):
-        rospy.init_node('test_message')   #initialize with roscore
-        self.publisher = rospy.Publisher('/my_point', PointStamped, queue_size=10)
-
-    def run(self):
-        r = rospy.Rate(2)  #Publishing at 2 Hz
-        while not rospy.is_shutdown():
-            my_point_stamped = PointStamped(header=Header(stamp=rospy.Time.now(), frame_id="odom"), point=Point(1.0,2.0,0.0))
-            publisher.publish(my_point_stamped)
-            r.sleep()
-
 class SendSpeed(object):
+    '''
+    Class container that handles sending the speed to a running neato node.
+    It should be imported and used as needed by other scripts.
+    '''
     def __init__(self):
+        '''Initializer will return instance from which you can call the important
+        functions'''
         rospy.init_node('Get_Speed')   #initialize with roscore
         self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
     def send_speed(self,move_forward = None, turn_left = None):
+        '''Sends a translational and rotational speed to the neato. Since the
+        neato can only control one axis in both translational and rotational
+        movement there are only 2 inputs
+        move_forward:
+            positive --> move forward
+            negative --> move backward
+        turn_left:
+            positive --> turn left
+            negative --> turn right'''
         if move_forward == None:
             move_forward = 0
         if turn_left == None:
@@ -42,6 +43,8 @@ class SendSpeed(object):
         self.publisher.publish(my_point_stamped)
 
     def low_rider(self):
+        '''Joke function to make the neato bounce.
+        Like so: https://www.youtube.com/watch?v=HEEHmiAR71Y'''
         t = 10
         r = rospy.Rate(5)
         for i in range(t):
@@ -57,6 +60,10 @@ class SendSpeed(object):
 ###############################################################################
 
 class ReceiveLidar(object):
+    '''
+    Class container that handles sending the speed to a running neato node.
+    It should be imported and used as needed by other scripts.
+    '''
     def __init__(self):
         rospy.init_node('receive_lidar')
         rospy.Subscriber("/scan", LaserScan, self.process_range)
