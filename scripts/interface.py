@@ -78,11 +78,12 @@ class ReceiveLidar(object):
     def run(self):
         rospy.spin()
 
-    def get_wall(self, threshold = .8):
+    def get_wall(self, threshold = .8, min_values = 5):
         if self.ranges is None:
             print('NO RANGES')
             return None, None
         values = np.array(self.ranges)
+
         # print(values)
         no_zeros_index = np.where(values)[0]
         # print(no_zeros_index)
@@ -90,13 +91,24 @@ class ReceiveLidar(object):
             print('NO REAL VALUES')
             return None, None
         no_zeros = values[no_zeros_index]
-        least = no_zeros.argsort()[0]
+        least = no_zeros.argsort()
         thresholds = []
-        if self.get_cost(least, no_zeros, no_zeros_index) < threshold:
-            return no_zeros_index[least], no_zeros[least]
-        else:
-            print('NOT GOOD ENOUGH')
-            return None, None
+        forbidden = set()
+        number_checked = 0
+        for least_val in least:
+            if no_zeros_index[least_val] in forbidden:
+                continue
+            elif self.get_cost(least_val, no_zeros, no_zeros_index) < threshold:
+                return no_zeros_index[least], no_zeros[least]
+            else:
+                for degree in range(no_zeros_index[least_val] - 5,no_zeros_index[least_val] + 5):
+                    forbidden.add(degree)
+                number_checked += 1
+            if number_checked >= min_values:
+                print('NOT GOOD ENOUGH')
+                return None, None
+        print('RAN OUT OF POINTS')
+        return None, None
 
     def get_cost(self, index, values, indices):
         # print(index)
