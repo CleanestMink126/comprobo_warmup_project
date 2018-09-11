@@ -58,7 +58,7 @@ class SendSpeed(object):
 
 class ReceiveLidar(object):
     def __init__(self):
-        rospy.init_node('receive_lidar')
+        # rospy.init_node('receive_lidar')
         rospy.Subscriber("/scan", LaserScan, self.process_range)
         self.ranges = None
 
@@ -73,12 +73,14 @@ class ReceiveLidar(object):
 
     def get_wall(self, threshold = .8):
         if self.ranges is None:
+            print('NO RANGES')
             return None, None
         values = np.array(self.ranges)
         # print(values)
         no_zeros_index = np.where(values)[0]
         # print(no_zeros_index)
         if not len(no_zeros_index):
+            print('NO REAL VALUES')
             return None, None
         no_zeros = values[no_zeros_index]
         least = no_zeros.argsort()[0]
@@ -86,6 +88,7 @@ class ReceiveLidar(object):
         if self.get_cost(least, no_zeros, no_zeros_index) < threshold:
             return no_zeros_index[least], no_zeros[least]
         else:
+            print('NOT GOOD ENOUGH')
             return None, None
 
     def get_cost(self, index, values, indices):
