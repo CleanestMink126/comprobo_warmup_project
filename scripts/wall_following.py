@@ -17,6 +17,8 @@ def run():
 
         #returns (degree_index int, distance float) follows equation OR (None, None)
         degree_index, d = mylidar.get_wall()
+        if d is not None:
+            print(degree_index,d)
         if degree_index != None: #if valid data received, determine what to do next
             if d >= 1.5: #far distance state
                 if degree_index >= 180:
@@ -35,7 +37,7 @@ def run():
                     else:
                         mytelC.myspeedctrl.send_speed(.25,.1+((degree_index-270)/100.0))
         else:
-            mytelC.myspeedctrl.send_speed(.25,0) #if no wall found, go straight
+            mytelC.myspeedctrl.send_speed(0,0) #if no wall found, go straight
     mytelC.myspeedctrl.send_speed(0,0) #when shut down, stop Neato from moving
 
 if __name__ == "__main__":

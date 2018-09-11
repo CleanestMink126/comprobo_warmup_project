@@ -7,6 +7,7 @@ from neato_node.msg import Accel
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 from nav_msgs.msg import Odometry
+from visualization_messages.msgs import Marker 
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -82,7 +83,7 @@ class ReceiveLidar(object):
     def run(self):
         rospy.spin()
 
-    def get_wall(self, threshold = .8, min_values = 5):
+    def get_wall(self, threshold = .8, min_values = 10):
         '''This method will find likely directions towards a wall given lidar data
         returns: direction towards nearest wall
                  distance to that wall
@@ -95,7 +96,7 @@ class ReceiveLidar(object):
         if not len(no_zeros_index): #make sure there is data
             print('NO REAL VALUES')
             return None, None
-        no_zeros = values[no_zeros_index] #get the corresponding values for the indices
+        no_zeros = ranges[no_zeros_index] #get the corresponding values for the indices
         least = no_zeros.argsort() #order the indices by closest values
         thresholds = []
         forbidden = set()
@@ -108,13 +109,8 @@ class ReceiveLidar(object):
             if no_zeros_index[least_val] in forbidden:#too close to another point
                 continue
             elif self.get_cost(least_val, no_zeros, no_zeros_index) < threshold:
-<<<<<<< HEAD
-                return no_zeros_index[least], no_zeros[least] # found likely wall
-            else: #the point is unworthy so blacklist this point and points around it
-=======
                 return no_zeros_index[least_val], no_zeros[least_val]
             else:
->>>>>>> 2e274e3e57d858dedfbb87bd8adb046ef34f0bc0
                 for degree in range(no_zeros_index[least_val] - 5,no_zeros_index[least_val] + 5):
                     forbidden.add(degree)
                 number_checked += 1
