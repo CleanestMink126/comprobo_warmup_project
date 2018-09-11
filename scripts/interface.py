@@ -108,8 +108,13 @@ class ReceiveLidar(object):
             if no_zeros_index[least_val] in forbidden:#too close to another point
                 continue
             elif self.get_cost(least_val, no_zeros, no_zeros_index) < threshold:
+<<<<<<< HEAD
                 return no_zeros_index[least], no_zeros[least] # found likely wall
             else: #the point is unworthy so blacklist this point and points around it
+=======
+                return no_zeros_index[least_val], no_zeros[least_val]
+            else:
+>>>>>>> 2e274e3e57d858dedfbb87bd8adb046ef34f0bc0
                 for degree in range(no_zeros_index[least_val] - 5,no_zeros_index[least_val] + 5):
                     forbidden.add(degree)
                 number_checked += 1
