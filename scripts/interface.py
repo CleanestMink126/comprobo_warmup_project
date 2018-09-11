@@ -99,7 +99,7 @@ class ReceiveLidar(object):
             if no_zeros_index[least_val] in forbidden:
                 continue
             elif self.get_cost(least_val, no_zeros, no_zeros_index) < threshold:
-                return no_zeros_index[least], no_zeros[least]
+                return no_zeros_index[least_val], no_zeros[least_val]
             else:
                 for degree in range(no_zeros_index[least_val] - 5,no_zeros_index[least_val] + 5):
                     forbidden.add(degree)
