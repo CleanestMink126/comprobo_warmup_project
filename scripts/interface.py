@@ -73,12 +73,19 @@ class ReceiveLidar(object):
         message.'''
         rospy.Subscriber("/scan", LaserScan, self.process_range)
         self.ranges = None
+        self.list_ranges = []
 
     def process_range(self, m):
         self.ranges = m.ranges #set range
+        self.list_range.append(m.ranges)
 
     def get_range(self):
         return self.ranges #get range for outside scripts
+
+    def get_list_ranges(self):
+        list_ranges = self.list_ranges
+        self.list_ranges = []
+        return list_ranges #all missed ranges
 
     def run(self):
         rospy.spin()
@@ -188,6 +195,9 @@ class ReceiveOdom(object):
     def process_odom(self, m):
         self.odom = m
         print(m)
+
+    def get_pos(self):
+        return self.odom.x, self.odom.y
 
     def run(self):
         rospy.spin()
