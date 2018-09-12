@@ -14,6 +14,7 @@ from geometry_msgs.msg import Vector3
 from nav_msgs.msg import Odometry
 from visualization_messages.msgs import Marker
 
+rospy.init_node('interface')
 
 ###############################################################################
 #Sending classes
@@ -26,7 +27,6 @@ class SendSpeed(object):
     def __init__(self):
         '''Initializer will return instance from which you can call the important
         functions'''
-        rospy.init_node('Get_Speed')   #initialize with roscore
         self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
     def send_speed(self,move_forward = None, turn_left = None):
@@ -66,7 +66,6 @@ class SendSpeed(object):
 
 class BaseLidar(object):
     def __init__(self):
-        # rospy.init_node('receive_lidar')
         '''Class currently only supports the range attribute of the Lidar
         message.'''
         rospy.Subscriber("/scan", LaserScan, self.process_range)
@@ -97,7 +96,6 @@ class ReceiveLidar(object):
     It should be imported and used as needed by other scripts.
     '''
     def __init__(self):
-        # rospy.init_node('receive_lidar')
         '''Class currently only supports the range attribute of the Lidar
         message.'''
         rospy.Subscriber("/scan", LaserScan, self.process_range)
@@ -183,7 +181,6 @@ class ReceiveBump(object):
     It should be imported and used as needed by other scripts.
     '''
     def __init__(self):
-        rospy.init_node('receive_bump')
         rospy.Subscriber("/bump", Bump, self.process_bump)
         self.m = 0
 
@@ -199,7 +196,6 @@ class ReceiveAccel(object):
     It should be imported and used as needed by other scripts.
     '''
     def __init__(self):
-        rospy.init_node('receive_bump')
         rospy.Subscriber("/accel", Accel, self.process_accel)
         self.m = 0
 
@@ -215,7 +211,6 @@ class ReceiveOdom(object):
     It should be imported and used as needed by other scripts.
     '''
     def __init__(self):
-        rospy.init_node('receive_odom')
         rospy.Subscriber("/odom", Odometry, self.process_odom)
         self.odom = None
 
