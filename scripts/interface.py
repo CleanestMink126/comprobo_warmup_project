@@ -1,5 +1,10 @@
 """ Investigate receiving a message using a callback function """
-
+from tf.transformations import euler_from_quaternion, rotation_matrix, quaternion_from_matrix
+import matplotlib.pyplot as plt
+import numpy as np
+import math
+import rospy
+##############Messages
 from geometry_msgs.msg import PointStamped
 from sensor_msgs.msg import LaserScan
 from neato_node.msg import Bump
@@ -8,10 +13,7 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 from nav_msgs.msg import Odometry
 from visualization_messages.msgs import Marker
-import matplotlib.pyplot as plt
-import numpy as np
-import math
-import rospy
+
 
 ###############################################################################
 #Sending classes
@@ -61,6 +63,33 @@ class SendSpeed(object):
 ###############################################################################
 #Receiving classes
 ###############################################################################
+
+class BaseLidar(object):
+    def __init__(self):
+        # rospy.init_node('receive_lidar')
+        '''Class currently only supports the range attribute of the Lidar
+        message.'''
+        rospy.Subscriber("/scan", LaserScan, self.process_range)
+        self.my_odom = ReceiveOdom()
+        self.list_ranges = []
+        self.list_odom = []
+
+    def process_range(self, m):
+        self.list_range.append(m.ranges)
+        self.list_odom.append(self.odom.get_odom())
+
+    def process_odom(self, m):
+        self.odom = m
+
+    def get_list_ranges(self):
+        list_ranges = self.list_ranges
+        self.list_ranges = []
+        list_odom = self.list_odom
+        self.list_odom = []
+        return list_ranges, list_odom #all missed ranges
+
+    def run(self):
+        rospy.spin()
 
 class ReceiveLidar(object):
     '''
@@ -148,8 +177,6 @@ class ReceiveLidar(object):
             return 100 #random high number
         return total_diff/number_found
 
-
-
 class ReceiveBump(object):
     '''
     Class container that handles reading Bump values from a running neato node.
@@ -194,10 +221,18 @@ class ReceiveOdom(object):
 
     def process_odom(self, m):
         self.odom = m
-        print(m)
 
-    def get_pos(self):
-        return self.odom.x, self.odom.y
+    def get_odom(pose):
+        """ Convert pose (geometry_msgs.Pose) to a (x,y,yaw) tuple """
+        if self.odom == None:
+            return None, None, None
+        pose = self.odom.pose.pose
+        orientation_tuple = (pose.orientation.x,
+                             pose.orientation.y,
+                             pose.orientation.z,
+                             pose.orientation.w)
+        angles = euler_from_quaternion(orientation_tuple)
+        return pose.position.x, pose.position.y, angles[2]
 
     def run(self):
         rospy.spin()
