@@ -117,7 +117,7 @@ class ReceiveLidar(object):
     def run(self):
         rospy.spin()
 
-    def get_wall(self, threshold = .8, min_values = 10):
+    def get_wall(self, threshold = .8, min_values = 10, required_points=30):
         '''This method will find likely directions towards a wall given lidar data
         returns: direction towards nearest wall
                  distance to that wall
@@ -142,7 +142,7 @@ class ReceiveLidar(object):
             will not be different.'''
             if no_zeros_index[least_val] in forbidden:#too close to another point
                 continue
-            elif self.get_cost(least_val, no_zeros, no_zeros_index) < threshold:
+            elif self.get_cost(least_val, no_zeros, no_zeros_index, required_points) < threshold:
                 return no_zeros_index[least_val], no_zeros[least_val]
             else:
                 for degree in range(no_zeros_index[least_val] - 5,no_zeros_index[least_val] + 5):
@@ -155,13 +155,12 @@ class ReceiveLidar(object):
         print('RAN OUT OF POINTS')
         return None, None
 
-    def get_cost(self, index, values, indices):
+    def get_cost(self, index, values, indices, required_points=30):
         '''Determines the likelyhood that a given index is the closest point of
         a wall by comparing its surroundings' readings to d/cos(theta) aka their
         expected readings'''
         d = values[index]
         valid_range = 45
-        required_points = 30
         total_diff = 0.0
         number_found = 0
         for i,v in enumerate(indices):
