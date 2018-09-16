@@ -12,10 +12,10 @@ from neato_node.msg import Accel
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 from nav_msgs.msg import Odometry
-from visualization_messages.msgs import Marker
+# from visualization_messages.msgs import Marker
+print('before interace')
 
-rospy.init_node('interface')
-
+print('after interface')
 ###############################################################################
 #Sending classes
 ###############################################################################
@@ -25,6 +25,7 @@ class SendSpeed(object):
     It should be imported and used as needed by other scripts.
     '''
     def __init__(self):
+        rospy.init_node('interface')
         '''Initializer will return instance from which you can call the important
         functions'''
         self.publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
@@ -68,14 +69,16 @@ class BaseLidar(object):
     def __init__(self):
         '''Class currently only supports the range attribute of the Lidar
         message.'''
+        rospy.init_node('interface')
         rospy.Subscriber("/scan", LaserScan, self.process_range)
         self.my_odom = ReceiveOdom()
         self.list_ranges = []
         self.list_odom = []
+        print('BaseLidar')
 
     def process_range(self, m):
-        self.list_range.append(m.ranges)
-        self.list_odom.append(self.odom.get_odom())
+        self.list_ranges.append(m.ranges)
+        self.list_odom.append(self.my_odom.get_odom())
 
     def process_odom(self, m):
         self.odom = m
@@ -100,19 +103,17 @@ class ReceiveLidar(object):
         message.'''
         rospy.Subscriber("/scan", LaserScan, self.process_range)
         self.ranges = None
-        self.list_ranges = []
 
     def process_range(self, m):
         self.ranges = m.ranges #set range
-        self.list_range.append(m.ranges)
 
     def get_range(self):
         return self.ranges #get range for outside scripts
 
-    def get_list_ranges(self):
-        list_ranges = self.list_ranges
-        self.list_ranges = []
-        return list_ranges #all missed ranges
+    # def get_list_ranges(self):
+    #     list_ranges = self.list_ranges
+    #     self.list_ranges = []
+    #     return list_ranges #all missed ranges
 
     def run(self):
         rospy.spin()
@@ -212,11 +213,13 @@ class ReceiveOdom(object):
     def __init__(self):
         rospy.Subscriber("/odom", Odometry, self.process_odom)
         self.odom = None
+        print('ReceiveOdom')
+
 
     def process_odom(self, m):
         self.odom = m
 
-    def get_odom(pose):
+    def get_odom(self):
         """ Convert pose (geometry_msgs.Pose) to a (x,y,yaw) tuple """
         if self.odom == None:
             return None, None, None
