@@ -10,13 +10,13 @@ import rospy
 def run(distance = 1.5, margin = .1):
     mytelC = teleop.TeleopC()
     mylidar = interface.ReceiveLidar()
+    base_s = .25 #base speed
+    base_t = .1 # base turning rate
+    prop = 100.0 #proportion to turn (higher = less turning)
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():
         r.sleep() #limit sampling rate
-        base_s = .25 #base speed
-        base_t = .1 # base turning rate
-        prop = 100.0 #proportion to turn (higher = less turning)
         #returns (degree_index int, distance float) follows equation OR (None, None)
         degree_index, d = mylidar.get_wall()
         if degree_index != None: #if valid data received, determine what to do next
