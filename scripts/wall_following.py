@@ -7,7 +7,7 @@ import interface
 import teleop
 import rospy
 
-def run(distance = 1.5, margin = .1):
+def run(distance = .75, margin = .25):
     mytelC = teleop.TeleopC()
     mylidar = interface.ReceiveLidar()
     base_s = .25 #base speed

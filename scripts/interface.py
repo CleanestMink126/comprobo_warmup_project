@@ -77,8 +77,9 @@ class BaseLidar(object):
         print('BaseLidar')
 
     def process_range(self, m):
-        self.list_ranges.append(m.ranges)
         self.list_odom.append(self.my_odom.get_odom())
+        self.list_ranges.append(m.ranges)
+
 
     def process_odom(self, m):
         self.odom = m
