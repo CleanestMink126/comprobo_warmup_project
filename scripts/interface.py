@@ -11,11 +11,10 @@ from neato_node.msg import Bump
 from neato_node.msg import Accel
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
+from geometry_msgs.msg import Point
 from nav_msgs.msg import Odometry
-# from visualization_messages.msgs import Marker
-print('before interace')
+from visualization_msgs.msg import Marker
 
-print('after interface')
 ###############################################################################
 #Sending classes
 ###############################################################################
@@ -61,6 +60,24 @@ class SendSpeed(object):
             self.publisher.publish(my_point_stamped)
             r.sleep()
 
+class SendLineMarker(object):
+    '''
+    Class container that handles sending the markers to a running neato node.
+    It should be imported and used as needed by other scripts.
+    '''
+    def __init__(self):
+        rospy.init_node('interface')
+        '''Initializer will return instance from which you can call the important
+        functions'''
+        self.publisher = rospy.Publisher('/my_viz', Marker, queue_size=10)
+
+    def update_marker(self,line_array):
+        my_line = Marker(action=3)
+        self.publisher.publish(my_line)
+        geom_points = [Point(x=p[0],y=p[1]) for p in line_array]
+        my_line = Marker(type= 4, id=0, points=geom_points)
+        self.publisher.publish(my_line)
+
 ###############################################################################
 #Receiving classes
 ###############################################################################
@@ -77,8 +94,9 @@ class BaseLidar(object):
         print('BaseLidar')
 
     def process_range(self, m):
-        self.list_ranges.append(m.ranges)
         self.list_odom.append(self.my_odom.get_odom())
+        self.list_ranges.append(m.ranges)
+
 
     def process_odom(self, m):
         self.odom = m
