@@ -39,6 +39,7 @@ class TrackOne(object):
         # self.distances = [] #list of distances to each point
         self.my_lidar = interface.BaseLidar()
         self.my_speed = interface.SendSpeed()
+        self.my_marker = interface.SendLineMarker()
         x = None
         self.center_person = None
         while x is None:
@@ -52,7 +53,6 @@ class TrackOne(object):
     def add_point(self,point):
         if not len(self.movements):
             x, y, yaw = self.my_lidar.my_odom.get_odom()
-
             # self.distances.append(distance(point, (x,y)))
             self.movements.append(point)
         else:
@@ -181,6 +181,7 @@ class TrackOne(object):
                 break
         while not rospy.is_shutdown():
             self.append_new_points()
+            self.my_marker.update_marker(self.movements)
         # self.append_new_points():
 
 if __name__ == "__main__":

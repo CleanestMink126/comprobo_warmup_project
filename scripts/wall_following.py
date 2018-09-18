@@ -6,10 +6,14 @@ import numpy as np
 import interface
 import teleop
 import rospy
+import math
+degrees2rad = pi/180
 
 def run(distance = .75, margin = .25):
     mytelC = teleop.TeleopC()
     mylidar = interface.ReceiveLidar()
+    mymarker = interface.SendLineMarker()
+    marker_width = 1
     base_s = .25 #base speed
     base_t = .1 # base turning rate
     prop = 100.0 #proportion to turn (higher = less turning)
@@ -19,7 +23,14 @@ def run(distance = .75, margin = .25):
         r.sleep() #limit sampling rate
         #returns (degree_index int, distance float) follows equation OR (None, None)
         degree_index, d = mylidar.get_wall()
+
         if degree_index != None: #if valid data received, determine what to do next
+            x, y = d * math.cos(degrees2rad * degree_index),  d * math.sin(degrees2rad * degree_index)
+            x_b = marker_width * math.cos(degrees2rad * degree_index + math.pi/2) + x
+            y_b = marker_width * math.sin(degrees2rad * degree_index  + math.pi/2) + y
+            x_e = marker_width * math.cos(degrees2rad * degree_index - math.pi/2) + x
+            y_e = marker_width * math.sin(degrees2rad * degree_index  - math.pi/2) + y
+            mymarker.update_marker([(x_b,y_b),(x,y),(x_e,y_e)])
             print(degree_index,d)
             if d > distance + margin: #far distance state
                 if 180 <= degree_index < 360 :
