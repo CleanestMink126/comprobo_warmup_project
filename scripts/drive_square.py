@@ -25,9 +25,7 @@ def run():
             for i in range(4):
                 mytelC.myspeedctrl.send_speed(1,0)
                 rospy.sleep(4) #value found by trail and error
-                mytelC.myspeedctrl.send_speed(0,-1)
-                rospy.sleep(1.61) #value found by trail and error
-
+                mytelC.turn_90degrees('right')
             mytelC.myspeedctrl.send_speed(0,0)
 
 

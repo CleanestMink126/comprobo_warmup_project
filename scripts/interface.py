@@ -60,6 +60,8 @@ class SendSpeed(object):
             self.publisher.publish(my_point_stamped)
             r.sleep()
 
+
+
 class SendLineMarker(object):
     '''
     Class container that handles sending the markers to a running neato node.

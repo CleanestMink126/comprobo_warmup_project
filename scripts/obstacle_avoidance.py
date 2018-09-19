@@ -6,16 +6,6 @@ import interface
 import teleop
 import rospy
 
-def turn_90degrees(direction, mytelC, base_s, base_t):
-    """  Turns Neato by 90 degrees based on input 'right' or 'left'
-    Values found by trial and error, not odom  """
-    if direction == "right":
-        mytelC.myspeedctrl.send_speed(0,base_t)
-    elif direction == "left":
-        mytelC.myspeedctrl.send_speed(0,-base_t)
-    rospy.sleep(1.61) #value found by trail and error
-    mytelC.myspeedctrl.send_speed(base_s,0)
-
 
 def run(distance = 1.5, margin = .25):
     mytelC = teleop.TeleopC()
@@ -35,24 +25,23 @@ def run(distance = 1.5, margin = .25):
             if degree_index <90 or degree_index >270: #object in front of Neato
                 if d < distance + margin: #close distance state
                     if degree_index < 90:
-                        turn_90degrees('left', mytelC, base_s, base_t)
+                        mytelC.turn_90degrees('left')
                         turned = 1
                     elif degree_index > 270:
-                        turn_90degrees('right', mytelC, base_s, base_t)
+                        mytelC.turn_90degrees('right')
                         turned = 2
                     degree_index2, d2 = mylidar.get_wall(required_points=10)
-                    print("took 2nd measurement")
                     while d2 < distance + margin:
                         if degree_index2  or degree_index2 :
-                            print('in while loop')
                             mytelC.myspeedctrl.send_speed(base_s,0)
-                            rospy.sleep(.5)
+                            rospy.sleep(.25)
                             degree_index2, d2 = mylidar.get_wall(required_points=10)
+                            print('degree2, d2', end='')
                             print(degree_index2, d2)
                     if turned == 1:
-                        turn_90degrees('right', mytelC, base_s, base_t)
+                        mytelC.turn_90degrees('right')
                     elif turned == 2:
-                        turn_90degrees('left', mytelC, base_s, base_t)
+                        mytelC.turn_90degrees('left')
                 turned = 0
             else: #clear path state
                 mytelC.myspeedctrl.send_speed(base_s,0)
