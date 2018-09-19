@@ -44,7 +44,7 @@ class TrackOne(object):
         self.center_person = None
         while x is None:
             x, y, yaw = self.my_lidar.my_odom.get_odom()
-        self.thres = .5
+        self.thres = .25
         # self.distance = 1
         self.speed = .5
         self.track_pos = None
@@ -74,7 +74,7 @@ class TrackOne(object):
             x_t, y_t = self.movements[0][0], self.movements[0][1]
             t_yaw = atan2(y_t - y, x_t - x)
             c_angle_diff = angle_diff(t_yaw, yaw)
-            self.my_speed.send_speed(.1-abs(c_angle_diff/(10*pi)), np.sign(c_angle_diff) * .25 +  c_angle_diff/2)
+            self.my_speed.send_speed(.1-abs(c_angle_diff/(10*pi)), np.sign(c_angle_diff) * .5 +  c_angle_diff/2)
         self.my_speed.send_speed(self.speed,0)
 
     def look_for_person(self):
@@ -173,8 +173,8 @@ class TrackOne(object):
         pass
     def convert_to_avg(self):
         x, y = zip(*self.movements)
-        x_conv = np.convolve([.2,.2,.2,.2,.2], np.array(x), 'valid')
-        y_conv = np.convolve([.2,.2,.2,.2,.2], np.array(y), 'valid')
+        x_conv = np.convolve([.125,.125,.125,.125,.125,.125,.125,.125], np.array(x), 'valid')
+        y_conv = np.convolve([.125,.125,.125,.125,.125,.125,.125,.125], np.array(y), 'valid')
         return zip(x_conv, y_conv)
 
     def run(self):
@@ -184,7 +184,7 @@ class TrackOne(object):
         while not rospy.is_shutdown():
             self.append_new_points()
             self.my_marker.update_marker(self.movements, frame_id = 'odom')
-            if len(self.movements)  > 40:
+            if len(self.movements)  > 80:
                 break
         self.movements = self.convert_to_avg()
         self.navigate_to_point()
