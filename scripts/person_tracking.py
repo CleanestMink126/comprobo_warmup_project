@@ -170,18 +170,15 @@ class TrackOne(object):
         pass
 
     def run(self):
-        #we need to navigate to the next spot while looking for new spots
-        # self.navigate_to_point()
-        # while not rospy.is_shutdown():
-        #
-        #     while self.check_progress():
-        #         self.navigate_to_point()
         while not rospy.is_shutdown():
             if self.look_for_person():
                 break
         while not rospy.is_shutdown():
             self.append_new_points()
             self.my_marker.update_marker(self.movements)
+            # while self.check_progress():
+            #         self.navigate_to_point()
+
         # self.append_new_points():
 
 if __name__ == "__main__":
@@ -192,5 +189,5 @@ if __name__ == "__main__":
     # tracker.add_point((0,.5))#to the left
     # # tracker.add_point(())
     # tracker.add_point((0,0))
-    print(tracker.movements)
+    # print(tracker.movements)
     tracker.run()

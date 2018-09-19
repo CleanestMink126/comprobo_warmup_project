@@ -13,6 +13,7 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Point
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Header
 from visualization_msgs.msg import Marker
 
 ###############################################################################
@@ -73,11 +74,19 @@ class SendLineMarker(object):
         functions'''
         self.publisher = rospy.Publisher('/my_viz', Marker, queue_size=10)
 
-    def update_marker(self,line_array):
-        my_line = Marker(action=3)
-        self.publisher.publish(my_line)
-        geom_points = [Point(x=p[0],y=p[1]) for p in line_array]
-        my_line = Marker(type= 4, id=0, points=geom_points)
+    def update_marker(self,line_array, frame_id = 'odom'):
+        # my_line = Marker(action=3)
+        # self.publisher.publish(my_line)
+        my_line = Marker(action = 0, type= 4, id=0, header=Header(frame_id=frame_id))
+        for p in line_array:
+            # print(p[0])
+            my_line.points.append(Point(x=p[0],y=p[1], z=0) )
+        my_line.scale.x = 0.2
+        my_line.scale.y = 0.2
+        my_line.color.b = 1.0
+        my_line.pose.orientation.w = 1.0
+        my_line.ns = "voronoi_2D_node"
+        my_line.color.a = 1.0
         self.publisher.publish(my_line)
 
 ###############################################################################
@@ -259,5 +268,7 @@ if __name__ == '__main__':
     # while not rospy.is_shutdown():
     #     print(node.get_wall())
     #     rospy.sleep(.3)
-    node = ReceiveOdom()
-    node.run()
+    node = SendLineMarker()
+    while not rospy.is_shutdown():
+        node.update_marker([(1,-1),(1,0),(1,1), (.3,.5)])
+    # rospy.spin()
