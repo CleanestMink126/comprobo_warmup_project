@@ -74,7 +74,7 @@ class SendLineMarker(object):
         functions'''
         self.publisher = rospy.Publisher('/my_viz', Marker, queue_size=10)
 
-    def update_marker(self,line_array, frame_id = 'odom'):
+    def update_marker(self,line_array, frame_id = 'base_link'):
         # my_line = Marker(action=3)
         # self.publisher.publish(my_line)
         my_line = Marker(action = 0, type= 4, id=0, header=Header(frame_id=frame_id))

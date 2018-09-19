@@ -44,7 +44,7 @@ class TrackOne(object):
         self.center_person = None
         while x is None:
             x, y, yaw = self.my_lidar.my_odom.get_odom()
-        self.thres = .05
+        self.thres = .5
         # self.distance = 1
         self.speed = .5
         self.track_pos = None
@@ -64,16 +64,17 @@ class TrackOne(object):
         x, y, yaw = self.my_lidar.my_odom.get_odom()
         while distance(self.movements[0],(x,y)) < self.thres:
             self.movements.pop(0)
+            print('Popped Point')
             # self.distances.pop(0)
         angle_threshold = pi / 38
         c_angle_diff = angle_threshold + 1
         while abs(c_angle_diff) > angle_threshold:
             x, y, yaw = self.my_lidar.my_odom.get_odom()
-            print('yaw', yaw)
+            # print('yaw', yaw)
             x_t, y_t = self.movements[0][0], self.movements[0][1]
             t_yaw = atan2(y_t - y, x_t - x)
             c_angle_diff = angle_diff(t_yaw, yaw)
-            self.my_speed.send_speed(0, np.sign(c_angle_diff) * .1 +  c_angle_diff/2)
+            self.my_speed.send_speed(.1-abs(c_angle_diff/(10*pi)), np.sign(c_angle_diff) * .25 +  c_angle_diff/2)
         self.my_speed.send_speed(self.speed,0)
 
     def look_for_person(self):
@@ -91,8 +92,8 @@ class TrackOne(object):
         # print(list_ranges)
         list_right = list_ranges[-value_range:-1]
         list_left = list_ranges[0:value_range]
-        indices_right = np.where(np.bitwise_and(0<list_right, list_right<3))[0] + 360 - value_range
-        indices_left = np.where(np.bitwise_and(0<list_left, list_left<3))[0]
+        indices_right = np.where(np.bitwise_and(0<list_right, list_right<2))[0] + 360 - value_range
+        indices_left = np.where(np.bitwise_and(0<list_left, list_left<2))[0]
         indices = np.concatenate([indices_left, indices_right])
         # print(indices)
         # print(indices)
@@ -100,8 +101,8 @@ class TrackOne(object):
             return False
         # print(indices)
         # print(np.cos(indices * degrees2rad - odom[2]))
-        x_mean = np.mean(np.cos(indices * degrees2rad + odom[2]) * list_ranges[indices] - odom[0])
-        y_mean = np.mean(np.sin(indices * degrees2rad + odom[2]) * list_ranges[indices] - odom[1])
+        x_mean = np.mean(np.cos(indices * degrees2rad + odom[2]) * list_ranges[indices] + odom[0])
+        y_mean = np.mean(np.sin(indices * degrees2rad + odom[2]) * list_ranges[indices] + odom[1])
         if self.center_person is None:
             self.center_person = (x_mean, y_mean)
             return False
@@ -126,8 +127,8 @@ class TrackOne(object):
             if not len(indices):
                 return
             # print(indices)
-            x_vals = np.cos(indices * degrees2rad + odom[2]) * list_range[indices] - odom[0]  - self.center_person[0]
-            y_vals = np.sin(indices * degrees2rad + odom[2]) * list_range[indices] - odom[1]  - self.center_person[1]
+            x_vals = np.cos(indices * degrees2rad + odom[2]) * list_range[indices] + odom[0]  - self.center_person[0]
+            y_vals = np.sin(indices * degrees2rad + odom[2]) * list_range[indices] + odom[1]  - self.center_person[1]
             # print(x_vals)
             distances = np.linalg.norm(np.concatenate([np.expand_dims(x_vals,axis=-1),
                                 np.expand_dims(y_vals,axis=-1)], axis = 1), axis = 1)
@@ -138,6 +139,8 @@ class TrackOne(object):
                 final_index = i
                 if distances[distance_indices[i+1]]- distances[distance_indices[i]] > diff_thres:
                     print(distances[distance_indices[i]] - distances[distance_indices[i+1]])
+                    break
+                if final_index > 8 or distances[distance_indices[i+1]] > 1:
                     break
             print(final_index)
             if final_index == 0:
@@ -168,6 +171,11 @@ class TrackOne(object):
         #start if not
         #TODO
         pass
+    def convert_to_avg(self):
+        x, y = zip(*self.movements)
+        x_conv = np.convolve([.2,.2,.2,.2,.2], np.array(x), 'valid')
+        y_conv = np.convolve([.2,.2,.2,.2,.2], np.array(y), 'valid')
+        return zip(x_conv, y_conv)
 
     def run(self):
         while not rospy.is_shutdown():
@@ -175,9 +183,14 @@ class TrackOne(object):
                 break
         while not rospy.is_shutdown():
             self.append_new_points()
-            self.my_marker.update_marker(self.movements)
-            # while self.check_progress():
-            #         self.navigate_to_point()
+            self.my_marker.update_marker(self.movements, frame_id = 'odom')
+            if len(self.movements)  > 40:
+                break
+        self.movements = self.convert_to_avg()
+        self.navigate_to_point()
+        while not rospy.is_shutdown():
+            while self.check_progress():
+                    self.navigate_to_point()
 
         # self.append_new_points():
 
