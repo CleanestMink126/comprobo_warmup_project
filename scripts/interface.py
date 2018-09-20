@@ -73,11 +73,8 @@ class SendLineMarker(object):
         self.publisher = rospy.Publisher('/my_viz', Marker, queue_size=10)
 
     def update_marker(self,line_array, frame_id = 'odom'):
-        # my_line = Marker(action=3)
-        # self.publisher.publish(my_line)
         my_line = Marker(action = 0, type= 4, id=0, header=Header(frame_id=frame_id))
         for p in line_array:
-            # print(p[0])
             my_line.points.append(Point(x=p[0],y=p[1], z=0) )
         my_line.scale.x = 0.2
         my_line.scale.y = 0.2
