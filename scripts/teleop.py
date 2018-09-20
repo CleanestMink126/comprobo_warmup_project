@@ -44,6 +44,17 @@ class TeleopC(object):
             elif self.key == 'l': #activate "low-rider" mode
                 self.myspeedctrl.low_rider()
 
+    def turn_90degrees(self, direction):
+        """  Turns Neato by 90 degrees based on direction ('right' or 'left')
+        Values found by trial and error, not odom
+        Works for turning speed 1 and sleep value 1.61"""
+        if direction == "right":
+            self.myspeedctrl.send_speed(0,1)
+        elif direction == "left":
+            self.myspeedctrl.send_speed(0,-1)
+        rospy.sleep(1.61) #value found by trail and error
+        self.myspeedctrl.send_speed(0,0)
+
 
 if __name__ == "__main__":
     myTeleop = TeleopC()

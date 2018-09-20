@@ -6,7 +6,9 @@ import numpy as np
 import interface
 import teleop
 import rospy
+from math import pi
 import math
+
 degrees2rad = pi/180
 
 def run(distance = .75, margin = .25):
@@ -14,7 +16,7 @@ def run(distance = .75, margin = .25):
     mylidar = interface.ReceiveLidar()
     mymarker = interface.SendLineMarker()
     marker_width = 1
-    base_s = .25 #base speed
+    base_s = .15 #base speed
     base_t = .1 # base turning rate
     prop = 100.0 #proportion to turn (higher = less turning)
 
