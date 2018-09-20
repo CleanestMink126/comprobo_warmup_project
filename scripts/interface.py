@@ -208,10 +208,17 @@ class ReceiveBump(object):
     '''
     def __init__(self):
         rospy.Subscriber("/bump", Bump, self.process_bump)
-        self.m = 0
+        self.bump = 0
 
     def process_bump(self, m):
-        self.m  = m
+        if not self.bump:
+            self.bump  = max(m.leftFront, m.leftSide, m.rightFront, m.rightSide)
+
+    def get_bump(self):
+        return self.bump
+
+    def reset_bump(self):
+        self.bump = 0
 
     def run(self):
         rospy.spin()

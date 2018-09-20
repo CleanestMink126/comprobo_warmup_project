@@ -187,16 +187,11 @@ class TrackOne(object):
         self.movements = self.convert_to_avg() #blurr points
         self.navigate_to_point() #got to first point
         while not rospy.is_shutdown(): #loop to go through all points
-            while self.check_progress():
+            while self.check_progress() and len(self.movements):
                     self.navigate_to_point()
+                    self.my_marker.update_marker(self.movements, frame_id = 'odom')
 
 if __name__ == "__main__":
     print('Start')
     tracker = TrackOne()
-    # tracker.add_point((0,0))
-    # tracker.add_point((.5,0))#forward
-    # tracker.add_point((0,.5))#to the left
-    # # tracker.add_point(())
-    # tracker.add_point((0,0))
-    # print(tracker.movements)
     tracker.run()

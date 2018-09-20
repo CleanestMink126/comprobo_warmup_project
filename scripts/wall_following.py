@@ -15,6 +15,7 @@ def run(distance = .75, margin = .25):
     mytelC = teleop.TeleopC()
     mylidar = interface.ReceiveLidar()
     mymarker = interface.SendLineMarker()
+    mybump = interface.ReceiveBump()
     marker_width = 1
     base_s = .15 #base speed
     base_t = .1 # base turning rate
@@ -24,8 +25,9 @@ def run(distance = .75, margin = .25):
     while not rospy.is_shutdown():
         r.sleep() #limit sampling rate
         #returns (degree_index int, distance float) follows equation OR (None, None)
+        if mybump.get_bump():#return if hit
+            break
         degree_index, d = mylidar.get_wall()
-
         if degree_index != None: #if valid data received, determine what to do next
             x, y = d * math.cos(degrees2rad * degree_index),  d * math.sin(degrees2rad * degree_index)
             x_b = marker_width * math.cos(degrees2rad * degree_index + math.pi/2) + x
@@ -60,6 +62,7 @@ def run(distance = .75, margin = .25):
         else:
             mytelC.myspeedctrl.send_speed(.1,0) #if no wall found, go straight
     mytelC.myspeedctrl.send_speed(0,0) #when shut down, stop Neato from moving
+    return degree_index
 
 if __name__ == "__main__":
     run()
