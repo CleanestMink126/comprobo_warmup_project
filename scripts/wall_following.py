@@ -34,6 +34,8 @@ def run(distance = .75, margin = .25):
             y_e = marker_width * math.sin(degrees2rad * degree_index  - math.pi/2) + y
             mymarker.update_marker([(x_b,y_b),(x,y),(x_e,y_e)])
             print(degree_index,d)
+            '''The next part is just some logic we drew out about which
+            ways to turn depending on distance and which direction the wall is'''
             if d > distance + margin: #far distance state
                 if 180 <= degree_index < 360 :
                     mytelC.myspeedctrl.send_speed(base_s,-base_t+((degree_index-360)/100.0))
