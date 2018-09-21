@@ -6,6 +6,21 @@ import interface
 import teleop
 import rospy
 
+def getangle90(angle):
+    """Wraps angles around
+    Returns an upper and lower value 45 degrees away from original input (90 degree FoV)"""
+    wrapped1 = True
+    wrapped2 = False
+    angleLow = angle-45
+    if angleLow <0:
+        wrap1 = True
+        angleLow+=360
+    angleHigh = angle+45
+    if angleHigh >360:
+        wrap2 = True
+        angleHigh = angleHigh-360
+    return(angleLow,angleHigh,wrapped1,wrapped2)
+
 
 def run(distance = 1.5, margin = .25):
     mytelC = teleop.TeleopC()
@@ -16,32 +31,27 @@ def run(distance = 1.5, margin = .25):
     turned = 0 #flag for if turned to avoid already or not
     d2 = 100
 
+    print(distance+margin)
     while not rospy.is_shutdown():
         rospy.sleep(.5) #limits sampling rate
-        degree_index, d = mylidar.get_wall(required_points=10)
+        isObject, degree_index = mylidar.get_object()
 
-        if degree_index != None: #if valid data received, determine what to do next
-            print(degree_index,d)
+        if isObject: #if valid data received, determine what to do next
+            mytelC.myspeedctrl.send_speed(0,0)
             if degree_index <90 or degree_index >270: #object in front of Neato
-                if d < distance + margin: #close distance state
-                    if degree_index < 90:
-                        mytelC.turn_90degrees('left')
-                        turned = 1
-                    elif degree_index > 270:
-                        mytelC.turn_90degrees('right')
-                        turned = 2
-                    degree_index2, d2 = mylidar.get_wall(required_points=10)
-                    while d2 < distance + margin:
-                        if degree_index2  or degree_index2 :
-                            mytelC.myspeedctrl.send_speed(base_s,0)
-                            rospy.sleep(.25)
-                            degree_index2, d2 = mylidar.get_wall(required_points=10)
-                            print('degree2, d2', end='')
-                            print(degree_index2, d2)
-                    if turned == 1:
-                        mytelC.turn_90degrees('right')
-                    elif turned == 2:
-                        mytelC.turn_90degrees('left')
+                if degree_index < 90:
+                    mytelC.turn_90degrees('left')
+                    turned = 1
+                    angleLow, angleHigh, wrap1, wrap2 = getangle90(90)
+                elif degree_index > 270:
+                    mytelC.turn_90degrees('right')
+                    turned = 2
+                    angleLow, angleHigh, wrap1, wrap2 = getangle90(270)
+                mytelC.myspeedctrl.send_speed(base_s,0)
+                print(angleLow, angleHigh)
+                while isObject:
+                    isObject, _ = mylidar.get_object(angle_range=[angleLow,angleHigh])
+                mytelC.turn_90degrees(turned)
                 turned = 0
             else: #clear path state
                 mytelC.myspeedctrl.send_speed(base_s,0)

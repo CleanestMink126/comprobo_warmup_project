@@ -8,6 +8,7 @@ import select
 import sys
 import termios
 import interface
+import rospy
 
 
 class TeleopC(object):
@@ -45,12 +46,12 @@ class TeleopC(object):
                 self.myspeedctrl.low_rider()
 
     def turn_90degrees(self, direction):
-        """  Turns Neato by 90 degrees based on direction ('right' or 'left')
+        """  Turns Neato by 90 degrees based on direction ('right'/1 or 'left'/2)
         Values found by trial and error, not odom
         Works for turning speed 1 and sleep value 1.61"""
-        if direction == "right":
+        if direction == "right" or direction == 1:
             self.myspeedctrl.send_speed(0,1)
-        elif direction == "left":
+        elif direction == "left" or direction == 2:
             self.myspeedctrl.send_speed(0,-1)
         rospy.sleep(1.61) #value found by trail and error
         self.myspeedctrl.send_speed(0,0)

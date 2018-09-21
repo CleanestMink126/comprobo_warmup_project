@@ -182,6 +182,27 @@ class ReceiveLidar(object):
         print('RAN OUT OF POINTS')
         return None, None
 
+    def get_object(self, threshold = .75, required_points = 3,angle_range=[0,360]):
+        '''Determines how close an object is in a given angle range'''
+        if self.ranges is None: #if Lidar data has not been received
+            print('NO RANGES')
+            return None, None
+        lranges = np.array(self.ranges) #convert to numpy array
+        if angle_range[0]-angle_range[1] < 0:
+            adjrange = np.squeeze(np.concatenate([lranges[:angle_range[1]],lranges[angle_range[0]:]], axis = 0))
+        else:
+            adjrange = np.squeeze(lranges[angle_range[0]:angle_range[1]])
+        print('adjrange',adjrange)
+        print('whyno print',0<adjrange)
+        print(adjrange<threshold)
+        no_zeros_index = np.where(np.bitwise_and(0<adjrange,adjrange<threshold))[0] #find indices where we have data
+        if len(no_zeros_index) <= required_points: #make sure there is data
+            print('True')
+            return False, 0
+        else:
+            return True, (np.mean(no_zeros_index)  + angle_range[0]) % 360
+
+
     def get_cost(self, index, values, indices, required_points=30):
         '''Determines the likelyhood that a given index is the closest point of
         a wall by comparing its surroundings' readings to d/cos(theta) aka their
