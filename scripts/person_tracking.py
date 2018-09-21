@@ -186,10 +186,10 @@ class TrackOne(object):
                 break
         self.movements = self.convert_to_avg() #blurr points
         self.navigate_to_point() #got to first point
-        while not rospy.is_shutdown(): #loop to go through all points
-            while self.check_progress() and len(self.movements):
-                    self.navigate_to_point()
-                    self.my_marker.update_marker(self.movements, frame_id = 'odom')
+        # while not rospy.is_shutdown(): #loop to go through all points
+        #     while self.check_progress() and len(self.movements):
+        #             self.navigate_to_point()
+        #             self.my_marker.update_marker(self.movements, frame_id = 'odom')
 
 if __name__ == "__main__":
     print('Start')
