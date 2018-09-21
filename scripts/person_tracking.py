@@ -190,31 +190,24 @@ class TrackOne(object):
         while not rospy.is_shutdown():#add the persons position for a set amount of time
             r.sleep()
             print("appending points")
-            self.append_new_points()
+            self.append_new_points() #update position and track of person
             self.my_marker.update_marker(self.movements, frame_id = 'odom')
-            if len(self.points) > 8:
+            if len(self.points) > 8: #if 8 points have been found, average them and add them to movements
                 print('adding movements')
                 self.add_movements()
-            if len(self.movements):
+            if len(self.movements): #start moving when the first point is added
                 print("navigating")
                 start = True
                 self.navigate_to_point()
             if start and self.check_progress() and len(self.movements):
+                #loop to navigate to points
                 self.navigate_to_point()
             if self.my_bump.get_bump():
+                #check bump sensor to stop
                 print('break')
                 self.my_bump.reset_bump()
                 break
 
-
-        #     if len(self.movements)  > max_points:
-        #         break
-        # # self.movements = self.convert_to_avg() #blurr points
-        # self.navigate_to_point() #got to first point
-        # while not rospy.is_shutdown(): #loop to go through all points
-        #     while self.check_progress() and len(self.movements):
-        #             self.navigate_to_point()
-        #             self.my_marker.update_marker(self.movements, frame_id = 'odom')
 
 if __name__ == "__main__":
     print('Start')
