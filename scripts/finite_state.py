@@ -2,7 +2,7 @@ import wall_following
 import person_tracking
 import teleop
 import numpy as np
-
+import rospy
 class FiniteState(object):
     def __init__(self):
         self.person_follower = person_tracking.TrackOne()
@@ -11,6 +11,13 @@ class FiniteState(object):
 
     def run(self):
         while not rospy.is_shutdown():
-            self.person_follower.run()
             degree_index = wall_following.run()
-            self.controller.turn_90degrees(np.sign(degree_index - 180))
+            if degree_index < 180:
+                self.controller.turn_90degrees('left')
+            else:
+                self.controller.turn_90degrees('right')
+            self.person_follower.run()
+
+if __name__ == '__main__':
+    m = FiniteState()
+    m.run()

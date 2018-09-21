@@ -21,11 +21,13 @@ def run(distance = .75, margin = .25):
     base_t = .1 # base turning rate
     prop = 100.0 #proportion to turn (higher = less turning)
 
-    r = rospy.Rate(10)
+    r = rospy.Rate(4)
+    mybump.reset_bump()
     while not rospy.is_shutdown():
         r.sleep() #limit sampling rate
         #returns (degree_index int, distance float) follows equation OR (None, None)
         if mybump.get_bump():#return if hit
+            mybump.reset_bump()
             break
         degree_index, d = mylidar.get_wall()
         if degree_index != None: #if valid data received, determine what to do next
@@ -35,7 +37,7 @@ def run(distance = .75, margin = .25):
             x_e = marker_width * math.cos(degrees2rad * degree_index - math.pi/2) + x
             y_e = marker_width * math.sin(degrees2rad * degree_index  - math.pi/2) + y
             mymarker.update_marker([(x_b,y_b),(x,y),(x_e,y_e)])
-            print(degree_index,d)
+            # print(degree_index,d)
             '''The next part is just some logic we drew out about which
             ways to turn depending on distance and which direction the wall is'''
             if d > distance + margin: #far distance state

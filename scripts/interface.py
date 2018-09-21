@@ -95,7 +95,7 @@ class BaseLidar(object):
         '''Class currently only supports the range attribute of the Lidar
         message.'''
         rospy.init_node('interface')
-        rospy.Subscriber("/scan", LaserScan, self.process_range)
+        rospy.Subscriber("/stable_scan", LaserScan, self.process_range)
         self.my_odom = ReceiveOdom()
         self.list_ranges = []
         self.list_odom = []
@@ -127,7 +127,7 @@ class ReceiveLidar(object):
     def __init__(self):
         '''Class currently only supports the range attribute of the Lidar
         message.'''
-        rospy.Subscriber("/scan", LaserScan, self.process_range)
+        rospy.Subscriber("/stable_scan", LaserScan, self.process_range)
         self.ranges = None
 
     def process_range(self, m):
@@ -182,22 +182,25 @@ class ReceiveLidar(object):
         print('RAN OUT OF POINTS')
         return None, None
 
-    def get_object(self, threshold = .75, required_points = 3,angle_range=[0,360]):
+    def get_object(self, threshold = .6, required_points = 5,angle_range=[0,360]):
         '''Determines how close an object is in a given angle range'''
         if self.ranges is None: #if Lidar data has not been received
             print('NO RANGES')
             return None, None
         lranges = np.array(self.ranges) #convert to numpy array
-        if angle_range[0]-angle_range[1] < 0:
-            adjrange = np.squeeze(np.concatenate([lranges[:angle_range[1]],lranges[angle_range[0]:]], axis = 0))
+        # print(lranges)
+        if angle_range[0]-angle_range[1] > 0:
+            # print(lranges[angle_range[0]:-1])
+            # print(lranges[0:angle_range[1]])
+            adjrange = np.concatenate([lranges[angle_range[0]:-1],lranges[0:angle_range[1]]], axis = 0)
         else:
-            adjrange = np.squeeze(lranges[angle_range[0]:angle_range[1]])
-        print('adjrange',adjrange)
-        print('whyno print',0<adjrange)
-        print(adjrange<threshold)
+            adjrange = lranges[angle_range[0]:angle_range[1]]
+        # print('adjrange',adjrange)
+        # print('whyno print',0<adjrange)
+        # print(adjrange<threshold)
         no_zeros_index = np.where(np.bitwise_and(0<adjrange,adjrange<threshold))[0] #find indices where we have data
         if len(no_zeros_index) <= required_points: #make sure there is data
-            print('True')
+            print('False')
             return False, 0
         else:
             return True, (np.mean(no_zeros_index)  + angle_range[0]) % 360

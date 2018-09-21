@@ -33,17 +33,17 @@ def run(distance = 1.5, margin = .25):
 
     print(distance+margin)
     while not rospy.is_shutdown():
-        rospy.sleep(.5) #limits sampling rate
-        isObject, degree_index = mylidar.get_object()
+        rospy.sleep(.1) #limits sampling rate
+        isObject, degree_index = mylidar.get_object(angle_range=[315,45])
 
         if isObject: #if valid data received, determine what to do next
             mytelC.myspeedctrl.send_speed(0,0)
             if degree_index <90 or degree_index >270: #object in front of Neato
-                if degree_index < 90:
+                if degree_index > 270:
                     mytelC.turn_90degrees('left')
                     turned = 1
                     angleLow, angleHigh, wrap1, wrap2 = getangle90(90)
-                elif degree_index > 270:
+                elif degree_index < 90:
                     mytelC.turn_90degrees('right')
                     turned = 2
                     angleLow, angleHigh, wrap1, wrap2 = getangle90(270)
