@@ -38,24 +38,28 @@ class TrackOne(object):
     the neato, then tracking their position and following their path
     '''
     def __init__(self):
-        self.movements = [] #list of tuples representing positions
+        self.points = [] #list of tuples representing positions
+        self.movements = []
         self.my_lidar = interface.BaseLidar()
         self.my_speed = interface.SendSpeed()
         self.my_marker = interface.SendLineMarker()
+        self.my_bump = interface.ReceiveBump()
         self.center_person = None #track where the person currently is
         x = None
         while x is None:
             x, y, yaw = self.my_lidar.my_odom.get_odom()
         self.thres = .25 #how close can a point be before the neato ignores it
-        self.speed = .5 #how fast to move
+        self.speed = .3 #how fast to move
+        self.num_to_average = 2
 
     def add_point(self,point):
         '''Add a point to the list of points to follow'''
-        if not len(self.movements):
-            x, y, yaw = self.my_lidar.my_odom.get_odom()
-            self.movements.append(point)
-        else:
-            self.movements.append(point)
+        self.points.append(point)
+
+    def add_movements(self):
+        val = np.mean([[x,y] for x,y in self.points], axis = 0)
+        self.points = []
+        self.movements.append((val[0], val[1]))
 
     def navigate_to_point(self):
         '''If we reached a point, turn to the next point in the list and
@@ -111,7 +115,7 @@ class TrackOne(object):
 
     def append_new_points(self):
         '''Do the math to add points onto movements'''
-        diff_thres = .5
+        diff_thres = .35
         list_ranges, list_odom = self.my_lidar.get_list_ranges()
         if not len(list_ranges):#check for 0 length
             return None
@@ -133,7 +137,7 @@ class TrackOne(object):
             distance_indices = np.argsort(distances)
             final_index = 0
             max_included = 8
-            max_distance = .5
+            max_distance = .75
             #Now we work our way up from the closest points until there is a big
             #gap in distance,we exceed max_included points, or we are max_distance
             # units away from the last point
@@ -176,16 +180,37 @@ class TrackOne(object):
     def run(self):
         '''Mainloop to control robot'''
         max_points = 80
+        start = False
+        r= rospy.Rate(5)
+        self.my_bump.reset_bump()
         while not rospy.is_shutdown():#look until we find a person
             if self.look_for_person():
+                print('fOUND PERSON')
                 break
         while not rospy.is_shutdown():#add the persons position for a set amount of time
+            r.sleep()
+            print("appending points")
             self.append_new_points()
             self.my_marker.update_marker(self.movements, frame_id = 'odom')
-            if len(self.movements)  > max_points:
+            if len(self.points) > 8:
+                print('adding movements')
+                self.add_movements()
+            if len(self.movements):
+                print("navigating")
+                start = True
+                self.navigate_to_point()
+            if start and self.check_progress() and len(self.movements):
+                self.navigate_to_point()
+            if self.my_bump.get_bump():
+                print('break')
+                self.my_bump.reset_bump()
                 break
-        self.movements = self.convert_to_avg() #blurr points
-        self.navigate_to_point() #got to first point
+
+
+        #     if len(self.movements)  > max_points:
+        #         break
+        # # self.movements = self.convert_to_avg() #blurr points
+        # self.navigate_to_point() #got to first point
         # while not rospy.is_shutdown(): #loop to go through all points
         #     while self.check_progress() and len(self.movements):
         #             self.navigate_to_point()
